@@ -1,12 +1,23 @@
 import type { NextPage } from "next";
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 
 const Home: NextPage = () => {
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  const [url, setUrl] = useState("");
+  const [result, setResult] = useState<string|null>(null);
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     console.log("submit");
 
     // Logic
+    const res = await fetch("/api/save-url", {
+      method: "post",
+      body: JSON.stringify({
+        url,
+      }),
+    });
+    const urlId = await res.json();
+
+    setResult(`${window.origin}/w/${urlId.url}`);
   }
 
   return (
@@ -16,11 +27,22 @@ const Home: NextPage = () => {
           type="text"
           name="url"
           id="url"
-          className="rounded-sm p-2"
+          onChange={(e) => setUrl(e.target.value)}
+          className="rounded-sm p-2 text-black"
           placeholder="Paste an URL"
         />
-        <button type="submit" className="ml-2 p-2 bg-blue-200 text-blue-900 font-bold rounded">Shorten</button>
+        <button
+          type="submit"
+          className="ml-2 p-2 bg-blue-200 text-blue-900 font-bold rounded"
+        >
+          Shorten
+        </button>
       </form>
+      {result && (
+        <div>
+          Result: {result}
+        </div>
+      )}
     </div>
   );
 };
